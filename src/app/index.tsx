@@ -1,98 +1,197 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+import { StyleSheet, View, TextInput, Text, FlatList, ScrollView } from 'react-native';
+import SearchIcon from '../../assets/search-svgrepo-com.svg';
+import MenuIcon from '../../assets/menu-alt-1-svgrepo-com.svg';
+import Eye from '../../assets/eye-svgrepo-com.svg';
+import { SearchBar } from 'react-native-screens';
+import { useState } from 'react';
+import Colors from '@/constants/Colors';
+import { Texts } from '@/constants/Texts';
+import { Tomatos } from '@/constants/Tomatos';
 
 export default function HomeScreen() {
+  const [text, onChangeText] = useState('Pesquise por uma receita')
+  const receitas = [
+    { id: 1, titulo: 'Bolo', desc: "asmdiujas8duhnasiudnuia8sdnhuasnbduyiasbnd" },
+    { id: 2, titulo: 'Bolinho', desc: "asydubasuydghaysudgbyuiasbdyu" },
+    { id: 3, titulo: 'Bolão', desc: "asdhbyuasdguysabgyudb7asuydbyuhsbaud" },
+    { id: 4, titulo: 'Bolão', desc: "asdhbyuasdguysabgyudb7asuydbyuhsbaud" },
+  ];
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <View style={styles.MainScreen}>
+      <View style={Tomatos.decorations} pointerEvents="none">
+        <Text style={Tomatos.tomato1}>🍅</Text>
+        <Text style={Tomatos.tomato2}>🍅</Text>
+        <Text style={Tomatos.tomato3}>🍅</Text>
+        <Text style={Tomatos.tomato4}>🍅</Text>
+        <Text style={Tomatos.tomato5}>🍅</Text>
+      </View>
+      <View style={styles.HeaderContainer}>
+        <MenuIcon
+          width={35}
+          height={35}
+        />
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
+        <View style={styles.SerchBar}>
+          <SearchIcon
+            width={25}
+            height={25}
           />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+          <TextInput style={styles.SearchInput} onChangeText={onChangeText}
+            placeholder={text} />
+        </View>
+      </View>
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+
+      <ScrollView style={styles.ContentContainer} contentContainerStyle={styles.Content}>
+
+        <FlatList
+          style={styles.CardsContainers}
+          data={receitas}
+          keyExtractor={(item) => item.id.toString()}
+
+          contentContainerStyle={styles.ListContent}
+
+          ListHeaderComponent={
+            <Text style={Texts.h1}>
+              Receitas mais vistas na semana
+            </Text>
+          }
+
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <View style={styles.CardInfos}>
+                <Text style={Texts.Title}>{item.titulo}</Text>
+                <Text style={Texts.h2}>{item.desc}</Text>
+              </View>
+
+              <Eye width={35} height={35} />
+            </View>
+          )}
+
+          ItemSeparatorComponent={() => (
+            <View style={{ height: 12 }} />
+          )}
+
+          showsVerticalScrollIndicator={false}
+        />
+
+        <FlatList
+          style={styles.CardsContainers}
+          data={receitas}
+          keyExtractor={(item) => item.id.toString()}
+
+          contentContainerStyle={styles.ListContent}
+
+          ListHeaderComponent={
+            <Text style={Texts.h1}>
+              As mais bombadas
+            </Text>
+          }
+
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <View style={styles.CardInfos}>
+                <Text style={Texts.Title}>{item.titulo}</Text>
+                <Text style={Texts.h2}>{item.desc}</Text>
+              </View>
+
+              <Eye width={35} height={35} />
+            </View>
+          )}
+
+          ItemSeparatorComponent={() => (
+            <View style={{ height: 12 }} />
+          )}
+
+          showsVerticalScrollIndicator={false}
+        />
+      </ScrollView>
+
+    </View>
   );
 }
 
+
+
 const styles = StyleSheet.create({
-  container: {
+  MainScreen: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    flexDirection: 'column',
+    alignItems: "center",
+    paddingTop: "15%",
+    backgroundColor: Colors.background,
+  },
+
+  HeaderContainer: {
+    width: "100%",
+    height: "10%",
+    display: "flex",
+    flexDirection: "row",
+    gap: 15,
+    padding: 10,
+  },
+
+  SerchBar: {
+    width: "85%",
+    height: "70%",
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 15,
+    paddingLeft: 10,
+    borderWidth: 2
+  },
+  SearchInput: {
+    color: "#000"
+  },
+
+  ContentContainer: {
+    flex: 1,
+    width: '100%',
+  },
+
+  Content: {
+    padding: 15,
+    paddingBottom: 50,
+    gap: 35,
+  },
+
+  CardsContainers: {
+    width: "100%",
+    height: "90%",
+    display: "flex",
+    flexDirection: "column",
+    padding: 5,
+    gap: 5
+  },
+
+  card: {
+    width: '100%',
+    minHeight: 100,
     flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
+    padding: 10,
     alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    gap: 15,
+    borderWidth: 2,
+    borderRadius: 15,
+    backgroundColor: Colors.surface,
+    borderColor: Colors.border,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+
+  CardInfos: {
+    width: "85%",
+    height: "90%",
+    display: "flex",
+    flexDirection: "column",
+    padding: 5
   },
-  title: {
-    textAlign: 'center',
+
+  ListContent: {
+    paddingBottom: 20,
+    gap: 10,
   },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
-});
+
+
+})

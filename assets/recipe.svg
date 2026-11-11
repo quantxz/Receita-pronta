@@ -1,0 +1,47 @@
+
+<svg width="160" height="180" viewBox="0 0 160 180"
+     fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Contorno do pergaminho -->
+  <path d="M36 12 Q25 12 25 24 L25 151 Q25 164 37 164
+           L123 164 Q135 164 135 151 L135 24 Q135 12 123 12 Z"
+        fill="#D7C69A" stroke="#588157" stroke-width="3"/>
+
+  <!-- Papel -->
+  <path d="M35 19 Q30 19 30 27 L30 145 Q30 157 41 157
+           L119 157 Q130 157 130 145 L130 27 Q130 19 119 19 Z"
+        fill="#F7F0DA" stroke="#A3B18A" stroke-width="1.5"/>
+
+  <!-- Bordas onduladas -->
+  <path d="M30 28 Q42 22 48 29 Q54 36 61 29 Q68 22 75 29
+           Q82 36 89 29 Q96 22 103 29 Q110 36 130 28"
+        stroke="#C2A878" stroke-width="2"/>
+
+  <path d="M30 147 Q44 140 52 147 Q60 154 68 147
+           Q76 140 84 147 Q92 154 100 147 Q108 140 130 147"
+        stroke="#C2A878" stroke-width="2"/>
+
+  <!-- Coração decorativo -->
+  <path d="M50 43 C50 35 61 35 64 43
+           C67 35 78 35 78 43
+           C78 51 64 58 64 58
+           C64 58 50 51 50 43Z"
+        fill="#A3B18A"/>
+
+  <!-- Título -->
+  <path d="M88 42 H112 M88 49 H108"
+        stroke="#588157" stroke-width="2.5"
+        stroke-linecap="round"/>
+
+  <!-- Linhas da receita -->
+  <path d="M45 73 H115 M45 85 H115
+           M45 97 H104 M45 109 H115
+           M45 121 H92"
+        stroke="#A3B18A" stroke-width="2.5"
+        stroke-linecap="round"/>
+
+  <!-- Detalhe decorativo -->
+  <path d="M105 130 Q115 121 121 130 Q115 139 105 130Z"
+        fill="#588157" opacity=".8"/>
+
+</svg>
