@@ -1,24 +1,70 @@
-import { StyleSheet, View, TextInput, Text, FlatList, ScrollView } from 'react-native';
-import SearchIcon from '../../assets/search-svgrepo-com.svg';
+import { StyleSheet, View, ScrollView, Text, Pressable, TextInput, Alert } from 'react-native';
 import MenuIcon from '../../assets/menu-alt-1-svgrepo-com.svg';
-import Eye from '../../assets/eye-svgrepo-com.svg';
-import { SearchBar } from 'react-native-screens';
-import { useState } from 'react';
 import Colors from '@/constants/Colors';
+import { FirebaseService } from '@/Services/firebase/Firebase_service';
+import { auth, db } from '../../data/firebase_config';
 import { Texts } from '@/constants/Texts';
 import { Tomatos } from '@/constants/Tomatos';
+import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'expo-router';
 
-export default function HomeScreen() {
-  const [text, onChangeText] = useState('Pesquise por uma receita')
-  const receitas = [
-    { id: 1, titulo: 'Bolo', desc: "asmdiujas8duhnasiudnuia8sdnhuasnbduyiasbnd" },
-    { id: 2, titulo: 'Bolinho', desc: "asydubasuydghaysudgbyuiasbdyu" },
-    { id: 3, titulo: 'Bolão', desc: "asdhbyuasdguysabgyudb7asuydbyuhsbaud" },
-    { id: 4, titulo: 'Bolão', desc: "asdhbyuasdguysabgyudb7asuydbyuhsbaud" },
-  ];
+export default function LoginScreen() {
+  const [Email, setEmail] = useState("")
+  const [Password, setPassword] = useState("")
+
+  const firebaseService = useRef<FirebaseService | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    firebaseService.current = new FirebaseService(db, auth);
+  }, []);
+
+  async function login() {
+    if ([Email, Password].some(campo => campo === "") || [Email, Password].some(campo => campo.length < 3)) {
+      Alert.alert("Erro", "Nenhum dos campos deve estar vazio ou ter menos de 3 caracteres");
+      return;
+    }
+    try {
+      const user = await firebaseService.current?.loginUser({ email: Email, password: Password })
+
+      router.replace('/NewRecipeScreen');
+
+    } catch (error: any) {
+      switch (error.code) {
+        case 'auth/invalid-credential':
+          Alert.alert('E-mail ou senha incorretos.')
+          throw new Error('E-mail ou senha incorretos.');
+
+        case 'auth/user-not-found':
+          throw new Error('Usuário não encontrado.');
+
+        case 'auth/wrong-password':
+          Alert.alert('E-mail ou senha incorretos.')
+          throw new Error('Senha incorreta.');
+
+        case 'auth/invalid-email':
+          Alert.alert('E-mail ou senha incorretos.')
+          throw new Error('O e-mail informado é inválido.');
+
+        case 'auth/too-many-requests':
+          throw new Error('Muitas tentativas. Tente novamente mais tarde.');
+
+        case 'auth/user-disabled':
+          Alert.alert('E-mail ou senha incorretos.')
+          throw new Error('Esta conta foi desativada.');
+
+        case 'auth/network-request-failed':
+          throw new Error('Verifique sua conexão com a internet.');
+
+        default:
+          Alert.alert('E-mail ou senha incorretos.')
+          throw new Error('Não foi possível realizar o login.');
+      }
+    }
+  }
 
   return (
-    <View style={styles.MainScreen}>
+    <View style={styles.container}>
       <View style={Tomatos.decorations} pointerEvents="none">
         <Text style={Tomatos.tomato1}>🍅</Text>
         <Text style={Tomatos.tomato2}>🍅</Text>
@@ -26,172 +72,57 @@ export default function HomeScreen() {
         <Text style={Tomatos.tomato4}>🍅</Text>
         <Text style={Tomatos.tomato5}>🍅</Text>
       </View>
-      <View style={styles.HeaderContainer}>
-        <MenuIcon
-          width={35}
-          height={35}
-        />
+      <Text style={Texts.bigTitle}>Receita pronta</Text>
+      <Text style={Texts.Subtitle}>Entre na sua conta</Text>
 
-        <View style={styles.SerchBar}>
-          <SearchIcon
-            width={25}
-            height={25}
-          />
-          <TextInput style={styles.SearchInput} onChangeText={onChangeText}
-            placeholder={text} />
-        </View>
+      <View style={styles.inputsContainer}>
+        <TextInput style={styles.inputs} placeholder='digite seu email' onChangeText={setEmail} />
+        <TextInput style={styles.inputs} placeholder='digite sua senha' onChangeText={setPassword} secureTextEntry={true} />
       </View>
 
 
-      <ScrollView style={styles.ContentContainer} contentContainerStyle={styles.Content}>
+      <Pressable style={styles.loginButton} onPress={login}>
+        <Text style={Texts.Subtitle}>Entrar na conta</Text>
+      </Pressable>
 
-        <FlatList
-          style={styles.CardsContainers}
-          data={receitas}
-          keyExtractor={(item) => item.id.toString()}
-
-          contentContainerStyle={styles.ListContent}
-
-          ListHeaderComponent={
-            <Text style={Texts.h1}>
-              Receitas mais vistas na semana
-            </Text>
-          }
-
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-              <View style={styles.CardInfos}>
-                <Text style={Texts.Title}>{item.titulo}</Text>
-                <Text style={Texts.h2}>{item.desc}</Text>
-              </View>
-
-              <Eye width={35} height={35} />
-            </View>
-          )}
-
-          ItemSeparatorComponent={() => (
-            <View style={{ height: 12 }} />
-          )}
-
-          showsVerticalScrollIndicator={false}
-        />
-
-        <FlatList
-          style={styles.CardsContainers}
-          data={receitas}
-          keyExtractor={(item) => item.id.toString()}
-
-          contentContainerStyle={styles.ListContent}
-
-          ListHeaderComponent={
-            <Text style={Texts.h1}>
-              As mais bombadas
-            </Text>
-          }
-
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-              <View style={styles.CardInfos}>
-                <Text style={Texts.Title}>{item.titulo}</Text>
-                <Text style={Texts.h2}>{item.desc}</Text>
-              </View>
-
-              <Eye width={35} height={35} />
-            </View>
-          )}
-
-          ItemSeparatorComponent={() => (
-            <View style={{ height: 12 }} />
-          )}
-
-          showsVerticalScrollIndicator={false}
-        />
-      </ScrollView>
-
-    </View>
+      <Text style={Texts.Subtitle}>Não tem uma conta? crie uma <Text style={Texts.link} onPress={() => { router.replace("/RegisterScreen") }}>aqui</Text></Text>
+    </View >
   );
 }
 
-
-
 const styles = StyleSheet.create({
-  MainScreen: {
+  container: {
     flex: 1,
-    justifyContent: 'flex-start',
-    flexDirection: 'column',
-    alignItems: "center",
-    paddingTop: "15%",
     backgroundColor: Colors.background,
-  },
-
-  HeaderContainer: {
-    width: "100%",
-    height: "10%",
-    display: "flex",
-    flexDirection: "row",
-    gap: 15,
     padding: 10,
-  },
-
-  SerchBar: {
-    width: "85%",
-    height: "70%",
-    display: "flex",
-    flexDirection: "row",
+    flexDirection: "column",
+    gap: 15,
     alignItems: "center",
-    borderRadius: 15,
-    paddingLeft: 10,
-    borderWidth: 2
+    justifyContent: "center",
   },
-  SearchInput: {
-    color: "#000"
-  },
-
-  ContentContainer: {
-    flex: 1,
-    width: '100%',
-  },
-
-  Content: {
-    padding: 15,
-    paddingBottom: 50,
-    gap: 35,
-  },
-
-  CardsContainers: {
+  inputsContainer: {
     width: "100%",
-    height: "90%",
-    display: "flex",
-    flexDirection: "column",
-    padding: 5,
-    gap: 5
-  },
-
-  card: {
-    width: '100%',
-    minHeight: 100,
-    flexDirection: 'row',
-    padding: 10,
-    alignItems: 'center',
+    minHeight: 250,
     gap: 15,
-    borderWidth: 2,
-    borderRadius: 15,
+    marginBottom: 15,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  inputs: {
+    width: "80%",
+    minHeight: 75,
     backgroundColor: Colors.surface,
-    borderColor: Colors.border,
+    borderRadius: 25,
+    paddingLeft: 30,
+    fontSize: 20
+  },
+  loginButton: {
+    backgroundColor: Colors.button,
+    width: "80%",
+    minHeight: 75,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 25,
   },
 
-  CardInfos: {
-    width: "85%",
-    height: "90%",
-    display: "flex",
-    flexDirection: "column",
-    padding: 5
-  },
-
-  ListContent: {
-    paddingBottom: 20,
-    gap: 10,
-  },
-
-
-})
+});

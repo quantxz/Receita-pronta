@@ -61,7 +61,7 @@ export default function HomeScreen() {
           renderItem={({ item }) => (
             <View style={styles.card}>
               <View style={styles.CardInfos}>
-                <Text style={Texts.h1}>{item.titulo}</Text>
+                <Text style={Texts.Title}>{item.titulo}</Text>
                 <Text style={Texts.h2}>{item.desc}</Text>
               </View>
 
@@ -92,7 +92,7 @@ export default function HomeScreen() {
           renderItem={({ item }) => (
             <View style={styles.card}>
               <View style={styles.CardInfos}>
-                <Text style={Texts.h1}>{item.titulo}</Text>
+                <Text style={Texts.Title}>{item.titulo}</Text>
                 <Text style={Texts.h2}>{item.desc}</Text>
               </View>
 

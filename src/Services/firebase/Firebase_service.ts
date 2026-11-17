@@ -5,7 +5,11 @@ import {
     addDoc,
     Firestore,
     setDoc,
-    doc
+    doc,
+    getDocs,
+    getDoc,
+    query,
+    where
 } from "firebase/firestore";
 import { questGemini } from "../AI/GeminiService";
 import { Alert } from "react-native";
@@ -101,6 +105,52 @@ export class FirebaseService {
             throw new Error("\nErro: " + error + "\n")
         }
 
+    }
+
+    public async getReceitas() {
+        try {
+            const snapshot = await getDocs(
+                collection(this._context, "receitas")
+            );
+
+            return snapshot.docs.map((documento) => ({
+                ...documento.data(),
+                id: documento.id
+            }));
+
+        } catch (error) {
+            console.error("Erro ao buscar receitas:", error);
+            throw error;
+        }
+    }
+
+    public async getReceita(id: string) {
+        try {
+            if (!id) {
+                throw new Error("ID da receita não informado");
+            }
+
+            const receitaRef = doc(
+                this._context,
+                "receitas",
+                id
+            );
+
+            const snapshot = await getDoc(receitaRef);
+
+            if (!snapshot.exists()) {
+                return null;
+            }
+
+            return {
+                ...snapshot.data(),
+                id: snapshot.id
+            };
+
+        } catch (error) {
+            console.error("Erro ao buscar receita:", error);
+            throw error;
+        }
     }
 
 
