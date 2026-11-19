@@ -12,14 +12,16 @@ import { FirebaseService } from '@/Services/firebase/Firebase_service';
 import { auth, db } from '../../data/firebase_config';
 import { Tomatos } from '@/constants/Tomatos';
 import { useLocalSearchParams } from 'expo-router';
+import { SideMenu } from '@/components/SideMenu';
 
 export default function ReceitasScreen() {
     const { id } = useLocalSearchParams<{ id?: string }>();
 
     const [itens, setItens] = useState<any[]>([]);
 
-    const [ingredientModal, setIngredientModal] = useState(false)
-    const [saveRecipeModal, setsaveRecipeModal] = useState(false)
+    const [ingredientModal, setIngredientModal] = useState(false);
+    const [saveRecipeModal, setsaveRecipeModal] = useState(false);
+    const [menuVisible, setMenuVisible] = useState(false);
     const [prepareMode, setPrepareMode] = useState("");
 
     const firebaseService = useRef<FirebaseService | null>(null);
@@ -49,6 +51,10 @@ export default function ReceitasScreen() {
 
     return (
         <View style={styles.container}>
+            <SideMenu
+                visible={menuVisible}
+                onClose={() => setMenuVisible(false)}
+            />
             <IngredientModal open={ingredientModal} setItens={setItens} setOpen={setIngredientModal} itens={itens} />
             <SaveRecipeModal open={saveRecipeModal} itens={itens} setOpen={setsaveRecipeModal} dbService={firebaseService.current} prepareMode={prepareMode} />
             <View style={Tomatos.decorations} pointerEvents="none">
@@ -59,11 +65,14 @@ export default function ReceitasScreen() {
                 <Text style={Tomatos.tomato5}>🍅</Text>
             </View>
             <View style={styles.header}>
-                <MenuIcon
-                    width={35}
-                    height={35}
+                <Pressable
                     style={styles.menu}
-                />
+                    onPress={() => setMenuVisible(true)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Abrir menu"
+                >
+                    <MenuIcon width={35} height={35} />
+                </Pressable>
             </View>
 
             <ScrollView

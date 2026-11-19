@@ -107,16 +107,28 @@ export class FirebaseService {
 
     }
 
-    public async getReceitas() {
+    public async getReceitas(limiter?: number) {
         try {
             const snapshot = await getDocs(
                 collection(this._context, "receitas")
             );
-
-            return snapshot.docs.map((documento) => ({
+            const recipes = snapshot.docs.map((documento) => ({
                 ...documento.data(),
                 id: documento.id
             }));
+
+            const limitedRecipes = []
+
+            if (limiter) {
+                let count = 0;
+                while (count != limiter) {
+                    limitedRecipes.push(recipes[count])
+                    count++
+                }
+                return limitedRecipes;
+            }
+
+            return recipes;
 
         } catch (error) {
             console.error("Erro ao buscar receitas:", error);

@@ -1,23 +1,32 @@
-import { StyleSheet, View, ScrollView, Text, Pressable, TextInput } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  Text,
+  Pressable,
+  TextInput
+} from 'react-native';
+
 import MenuIcon from '../../assets/menu-alt-1-svgrepo-com.svg';
 import TrashIcon from '../../assets/trash-xmark-svgrepo-com.svg';
 
 import { useEffect, useRef, useState } from 'react';
 import { Texts } from '@/constants/Texts';
 import Colors from '@/constants/Colors';
-import AppTabs from '@/components/app-tabs';
 import { IngredientModal } from '@/components/IngredientModal';
 import { SaveRecipeModal } from '@/components/SaveRecipeModal';
+import { SideMenu } from '@/components/SideMenu';
 import { FirebaseService } from '@/Services/firebase/Firebase_service';
 import { auth, db } from '../../data/firebase_config';
 import { Tomatos } from '@/constants/Tomatos';
 
 export default function ReceitasScreen() {
-  const [itens, setItens] = useState([])
+  const [itens, setItens] = useState<any[]>([]);
 
-  const [ingredientModal, setIngredientModal] = useState(false)
-  const [saveRecipeModal, setsaveRecipeModal] = useState(false)
-  const [prepareMode, setPrepareMode] = useState("");
+  const [ingredientModal, setIngredientModal] = useState(false);
+  const [saveRecipeModal, setsaveRecipeModal] = useState(false);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [prepareMode, setPrepareMode] = useState('');
 
   const firebaseService = useRef<FirebaseService | null>(null);
 
@@ -27,6 +36,10 @@ export default function ReceitasScreen() {
 
   return (
     <View style={styles.container}>
+      <SideMenu
+        visible={menuVisible}
+        onClose={() => setMenuVisible(false)}
+      />
       <IngredientModal open={ingredientModal} setItens={setItens} setOpen={setIngredientModal} itens={itens} />
       <SaveRecipeModal open={saveRecipeModal} itens={itens} setOpen={setsaveRecipeModal} dbService={firebaseService.current} prepareMode={prepareMode} />
       <View style={Tomatos.decorations} pointerEvents="none">
@@ -37,11 +50,14 @@ export default function ReceitasScreen() {
         <Text style={Tomatos.tomato5}>🍅</Text>
       </View>
       <View style={styles.header}>
-        <MenuIcon
-          width={35}
-          height={35}
+        <Pressable
           style={styles.menu}
-        />
+          onPress={() => setMenuVisible(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Abrir menu"
+        >
+          <MenuIcon width={35} height={35} />
+        </Pressable>
       </View>
 
       <ScrollView

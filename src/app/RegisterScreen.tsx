@@ -48,7 +48,7 @@ export default function RegisterScreen() {
         password: Password
       })
 
-      router.replace('/NewRecipeScreen');
+      router.replace('/MainScreen');
 
     } catch (error) {
       console.warn(error)
@@ -86,7 +86,7 @@ export default function RegisterScreen() {
         <Text style={Texts.Subtitle}>Criar conta</Text>
       </Pressable>
 
-      <Text style={Texts.Subtitle}>Ja tem uma conta? acesse ela <Text style={Texts.link} onPress={() => {router.replace("/LoginScreen")}}>aqui</Text></Text>
+      <Text style={Texts.Subtitle}>Ja tem uma conta? acesse ela <Text style={Texts.link} onPress={() => { router.replace("/LoginScreen") }}>aqui</Text></Text>
     </View >
   );
 }

@@ -1,70 +1,88 @@
-import { StyleSheet, View, ScrollView, Text, Pressable, TextInput, Alert } from 'react-native';
+
+import {
+  StyleSheet,
+  View,
+  TextInput,
+  Text,
+  ScrollView,
+  Pressable,
+} from 'react-native';
+import { SideMenu } from '@/components/SideMenu';
+
+import SearchIcon from '../../assets/search-svgrepo-com.svg';
 import MenuIcon from '../../assets/menu-alt-1-svgrepo-com.svg';
+import Eye from '../../assets/eye-svgrepo-com.svg';
+
+import { useEffect, useRef, useState } from 'react';
 import Colors from '@/constants/Colors';
-import { FirebaseService } from '@/Services/firebase/Firebase_service';
-import { auth, db } from '../../data/firebase_config';
 import { Texts } from '@/constants/Texts';
 import { Tomatos } from '@/constants/Tomatos';
-import { useEffect, useRef, useState } from 'react';
+import { auth, db } from '../../data/firebase_config';
+import { FirebaseService } from '@/Services/firebase/Firebase_service';
 import { useRouter } from 'expo-router';
 
-export default function LoginScreen() {
-  const [Email, setEmail] = useState("")
-  const [Password, setPassword] = useState("")
+type Receita = {
+  id: string;
+  nome: string;
+  prepareMode: string;
+};
 
+export default function HomeScreen() {
+  const [text, onChangeText] = useState('');
   const firebaseService = useRef<FirebaseService | null>(null);
+  const [receitas, setReceitas] = useState<Receita[]>([]);
+  const [menuVisible, setMenuVisible] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     firebaseService.current = new FirebaseService(db, auth);
-  }, []);
 
-  async function login() {
-    if ([Email, Password].some(campo => campo === "") || [Email, Password].some(campo => campo.length < 3)) {
-      Alert.alert("Erro", "Nenhum dos campos deve estar vazio ou ter menos de 3 caracteres");
-      return;
-    }
-    try {
-      const user = await firebaseService.current?.loginUser({ email: Email, password: Password })
-
-      router.replace('/NewRecipeScreen');
-
-    } catch (error: any) {
-      switch (error.code) {
-        case 'auth/invalid-credential':
-          Alert.alert('E-mail ou senha incorretos.')
-          throw new Error('E-mail ou senha incorretos.');
-
-        case 'auth/user-not-found':
-          throw new Error('Usuário não encontrado.');
-
-        case 'auth/wrong-password':
-          Alert.alert('E-mail ou senha incorretos.')
-          throw new Error('Senha incorreta.');
-
-        case 'auth/invalid-email':
-          Alert.alert('E-mail ou senha incorretos.')
-          throw new Error('O e-mail informado é inválido.');
-
-        case 'auth/too-many-requests':
-          throw new Error('Muitas tentativas. Tente novamente mais tarde.');
-
-        case 'auth/user-disabled':
-          Alert.alert('E-mail ou senha incorretos.')
-          throw new Error('Esta conta foi desativada.');
-
-        case 'auth/network-request-failed':
-          throw new Error('Verifique sua conexão com a internet.');
-
-        default:
-          Alert.alert('E-mail ou senha incorretos.')
-          throw new Error('Não foi possível realizar o login.');
+    async function carregarReceitas() {
+      try {
+        const dados = await firebaseService.current?.getReceitas(6);
+        setReceitas((dados ?? []) as Receita[]);
+        console.log(dados);
+      } catch (error) {
+        console.error('Erro ao carregar receitas:', error);
       }
     }
-  }
+
+    carregarReceitas();
+  }, []);
+
+  const abrirReceita = (id: string) => {
+    router.push({
+      pathname: '/Recipe',
+      params: { id: String(id) },
+    });
+  };
+
+  const renderReceitas = (titulo: string) => (
+    <View style={styles.CardsContainers}>
+      <Text style={Texts.h1}>{titulo}</Text>
+
+      {receitas.map((item) => (
+        <View key={String(item.id)} style={styles.card}>
+          <View style={styles.CardInfos}>
+            <Text style={Texts.Title}>
+              {item.nome}
+            </Text>
+
+            <Text style={Texts.h2} numberOfLines={2}>
+              {item.prepareMode}
+            </Text>
+          </View>
+
+          <Pressable onPress={() => abrirReceita(item.id)}>
+            <Eye width={35} height={35} />
+          </Pressable>
+        </View>
+      ))}
+    </View>
+  );
 
   return (
-    <View style={styles.container}>
+    <View style={styles.MainScreen}>
       <View style={Tomatos.decorations} pointerEvents="none">
         <Text style={Tomatos.tomato1}>🍅</Text>
         <Text style={Tomatos.tomato2}>🍅</Text>
@@ -72,57 +90,106 @@ export default function LoginScreen() {
         <Text style={Tomatos.tomato4}>🍅</Text>
         <Text style={Tomatos.tomato5}>🍅</Text>
       </View>
-      <Text style={Texts.bigTitle}>Receita pronta</Text>
-      <Text style={Texts.Subtitle}>Entre na sua conta</Text>
+      <SideMenu
+        visible={menuVisible}
+        onClose={() => setMenuVisible(false)}
+      />
+      <View style={styles.HeaderContainer}>
+        <Pressable onPress={() => setMenuVisible(true)}>
+          <MenuIcon width={35} height={35} />
+        </Pressable>
 
-      <View style={styles.inputsContainer}>
-        <TextInput style={styles.inputs} placeholder='digite seu email' onChangeText={setEmail} />
-        <TextInput style={styles.inputs} placeholder='digite sua senha' onChangeText={setPassword} secureTextEntry={true} />
+        <View style={styles.SerchBar}>
+          <SearchIcon width={25} height={25} />
+
+          <TextInput
+            style={styles.SearchInput}
+            value={text}
+            onChangeText={onChangeText}
+            placeholder="Pesquise por uma receita"
+          />
+        </View>
       </View>
 
-
-      <Pressable style={styles.loginButton} onPress={login}>
-        <Text style={Texts.Subtitle}>Entrar na conta</Text>
-      </Pressable>
-
-      <Text style={Texts.Subtitle}>Não tem uma conta? crie uma <Text style={Texts.link} onPress={() => { router.replace("/RegisterScreen") }}>aqui</Text></Text>
-    </View >
+      <ScrollView
+        style={styles.ContentContainer}
+        contentContainerStyle={styles.Content}
+        showsVerticalScrollIndicator={false}
+      >
+        {renderReceitas('Receitas mais vistas na semana')}
+        {renderReceitas('As mais bombadas')}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  MainScreen: {
     flex: 1,
+    justifyContent: 'flex-start',
+    flexDirection: 'column',
+    alignItems: 'center',
+    paddingTop: '15%',
     backgroundColor: Colors.background,
-    padding: 10,
-    flexDirection: "column",
-    gap: 15,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  inputsContainer: {
-    width: "100%",
-    minHeight: 250,
-    gap: 15,
-    marginBottom: 15,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  inputs: {
-    width: "80%",
-    minHeight: 75,
-    backgroundColor: Colors.surface,
-    borderRadius: 25,
-    paddingLeft: 30,
-    fontSize: 20
-  },
-  loginButton: {
-    backgroundColor: Colors.button,
-    width: "80%",
-    minHeight: 75,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 25,
   },
 
+  HeaderContainer: {
+    width: '100%',
+    height: '10%',
+    flexDirection: 'row',
+    gap: 15,
+    padding: 10,
+  },
+
+  SerchBar: {
+    width: '85%',
+    height: '70%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 15,
+    paddingLeft: 10,
+    borderWidth: 2,
+  },
+
+  SearchInput: {
+    color: '#000',
+    flex: 1,
+  },
+
+  ContentContainer: {
+    flex: 1,
+    width: '100%',
+  },
+
+  Content: {
+    padding: 15,
+    paddingBottom: 50,
+    gap: 35,
+  },
+
+  CardsContainers: {
+    width: '100%',
+    flexDirection: 'column',
+    padding: 5,
+    gap: 12,
+  },
+
+  card: {
+    width: '100%',
+    minHeight: 100,
+    flexDirection: 'row',
+    padding: 10,
+    alignItems: 'center',
+    gap: 15,
+    borderWidth: 2,
+    borderRadius: 15,
+    backgroundColor: Colors.surface,
+    borderColor: Colors.border,
+  },
+
+  CardInfos: {
+    flex: 1,
+    flexDirection: 'column',
+    padding: 5,
+  },
 });

@@ -27,7 +27,7 @@ export default function LoginScreen() {
     try {
       const user = await firebaseService.current?.loginUser({ email: Email, password: Password })
 
-      router.replace('/NewRecipeScreen');
+      router.replace('/MainScreen');
 
     } catch (error: any) {
       switch (error.code) {
